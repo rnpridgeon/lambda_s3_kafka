@@ -23,10 +23,12 @@ if [[ $PKGNAME != *.zip ]]; then
 fi
 
 if [[ $PKGNAME != /* ]]; then
-    PKGNAME="$PWD/$PKGNAME"
+    PKGNAME="/v/$PKGNAME"
 fi
 
 stagedir=$(mktemp -d -p . stage-XXXXXXX)
+
+pip3 install virtualenv
 
 if [[ ! -f venv/bin/activate ]]; then
     virtualenv -p python3.6 venv
@@ -34,19 +36,20 @@ fi
 
 source venv/bin/activate
 
-pip install -r requirements.txt
+pip3 install -r /v/requirements.txt
 
 # Clean up packages not needed during runtime
-pip uninstall -y setuptools docutils
+pip3 uninstall -y setuptools docutils
 
 (cd "$VIRTUAL_ENV/lib/python3.6/site-packages/" && zip -r9 $PKGNAME .)
-zip -g "$PKGNAME" lambda_s3_kafka.py
+
+cd /v && zip -g "$PKGNAME" lambda_function.py
 
 deactivate
 
 echo "$PKGNAME created"
-du -sh "$PKGNAME"
 
+du -sh "$PKGNAME"
 
 rm -rf "$stagedir"
 
